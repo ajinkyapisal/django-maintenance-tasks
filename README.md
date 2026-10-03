@@ -17,10 +17,10 @@ Celery and others.
 
 ## Install
 
-Requires Python 3.12+ and Django 6.0+. Not on PyPI yet, so install from GitHub:
+Requires Python 3.12+ and Django 6.0+.
 
 ```bash
-pip install git+https://github.com/ajinkyapisal/django-maintenance-tasks
+pip install django-maintenance-tasks
 ```
 
 ```python
