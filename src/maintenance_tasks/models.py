@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
@@ -37,6 +38,13 @@ class Run(models.Model):
     # Updated when a job is enqueued, starts, and after every batch. Used to
     # spot runs whose worker died.
     heartbeat_at = models.DateTimeField(null=True, blank=True)
+    started_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
     error_class = models.CharField(max_length=255, blank=True)
     error_message = models.TextField(blank=True)
     backtrace = models.TextField(blank=True)

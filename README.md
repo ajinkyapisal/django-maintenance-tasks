@@ -13,7 +13,9 @@ It runs on Django's built-in [Tasks framework](https://docs.djangoproject.com/en
 so it works with any task backend: the database backend from `django-tasks`, RQ,
 Celery and others.
 
-> Status: early scaffold. The API may change.
+> Status: early. The API may change.
+
+![Runs in the Django admin: running, paused, errored and succeeded, with progress](docs/admin-runs.png)
 
 ## Install
 
@@ -66,8 +68,8 @@ class BackfillSlugs(MaintenanceTask):
 - `process(item)` handles one item. It must be safe to run twice on the same
   item: after a crash, up to one batch can be processed again.
 - `self.arguments` holds the JSON arguments the run was started with.
-- `count()` gives the total for the progress bar. Override it if counting is
-  slow.
+- `count()` gives the total for the progress bar. It runs in the first job,
+  not when you click Start, so a slow count never holds up the admin.
 - `throttle()` returns `True` to back off for `throttle_backoff` seconds, for
   example when database replicas are lagging.
 
@@ -75,7 +77,7 @@ class BackfillSlugs(MaintenanceTask):
 
 From the admin: **Maintenance tasks → Runs → Start a run**. Select runs to
 pause, resume or cancel them. Starting and controlling runs needs the
-`maintenance_tasks.add_run` permission.
+`maintenance_tasks.add_run` permission. Each run records who started it.
 
 From the command line:
 
@@ -89,7 +91,7 @@ From code:
 ```python
 from maintenance_tasks import runner
 
-run = runner.start("blog.maintenance_tasks.BackfillSlugs")
+run = runner.start("blog.maintenance_tasks.BackfillSlugs", started_by=request.user)
 runner.pause(run)
 runner.resume(run)
 runner.cancel(run)
@@ -134,7 +136,6 @@ runner.cancel(run)
 - Dry runs
 - Retrying errored runs from the cursor
 - Live progress in the admin
-- Run history: who started what, with which arguments
 
 ## Development
 
@@ -156,3 +157,7 @@ docker run -d --name dmt-pg -e POSTGRES_HOST_AUTH_METHOD=trust \
 .venv/bin/python example/manage.py migrate
 .venv/bin/python example/e2e.py
 ```
+
+To click around the admin with runs in every state, run
+`example/demo_data.py` (it creates a local-only `admin`/`admin` user), then
+`example/manage.py runserver` and open http://127.0.0.1:8000/admin/.

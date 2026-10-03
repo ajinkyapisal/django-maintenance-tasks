@@ -15,6 +15,7 @@ SECRET_KEY = "demo"
 DEBUG = True
 USE_TZ = True
 ROOT_URLCONF = "example.urls"
+STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 INSTALLED_APPS = [
@@ -23,6 +24,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.messages",
     "django.contrib.sessions",
+    "django.contrib.staticfiles",
     "django_tasks_db",
     "maintenance_tasks",
     "example.blog",

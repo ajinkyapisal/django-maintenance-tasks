@@ -43,15 +43,14 @@ def stale_after():
     return _setting("STALE_AFTER", 600)
 
 
-def start(task_name, arguments=None):
-    task_cls = get_task(task_name)
-    arguments = arguments or {}
+def start(task_name, arguments=None, started_by=None):
+    get_task(task_name)
     try:
         with transaction.atomic():
             run = Run.objects.create(
                 task_name=task_name,
-                arguments=arguments,
-                tick_total=task_cls(arguments).count(),
+                arguments=arguments or {},
+                started_by=started_by,
                 heartbeat_at=timezone.now(),
             )
     except IntegrityError:
@@ -176,6 +175,10 @@ class Executor:
         deadline = time.monotonic() + max_runtime()
         pending = 0
         try:
+            if run.started_at is None:
+                # Counted here rather than in start(), so a slow COUNT(*) on
+                # a big table never holds up the admin request.
+                self._mine().update(tick_total=self.task.count())
             if self.task.throttle():
                 self._requeue(self.task.throttle_backoff)
                 return

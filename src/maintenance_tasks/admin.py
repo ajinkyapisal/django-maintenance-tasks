@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
+from django.utils.html import format_html
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 
@@ -34,7 +35,15 @@ class StartRunForm(forms.Form):
 @admin.register(Run)
 class RunAdmin(admin.ModelAdmin):
     change_list_template = "admin/maintenance_tasks/run/change_list.html"
-    list_display = ["id", "task_name", "status", "progress_display", "created_at", "ended_at"]
+    list_display = [
+        "id",
+        "task_name",
+        "status",
+        "progress_display",
+        "started_by",
+        "created_at",
+        "ended_at",
+    ]
     list_filter = ["status", "task_name"]
     search_fields = ["task_name"]
     actions = ["pause_runs", "resume_runs", "cancel_runs", "recover_runs"]
@@ -56,7 +65,14 @@ class RunAdmin(admin.ModelAdmin):
     def progress_display(self, run):
         if run.progress is None:
             return run.tick_count
-        return f"{run.tick_count} / {run.tick_total} ({run.progress}%)"
+        return format_html(
+            '<span style="white-space: nowrap"><progress value="{}" max="100" style="width: 8em; vertical-align: middle">'
+            "</progress> {} / {} ({}%)</span>",
+            run.progress,
+            run.tick_count,
+            run.tick_total,
+            run.progress,
+        )
 
     def get_urls(self):
         return [
@@ -74,7 +90,9 @@ class RunAdmin(admin.ModelAdmin):
         if request.method == "POST" and form.is_valid():
             try:
                 run = runner.start(
-                    form.cleaned_data["task_name"], form.cleaned_data["arguments"]
+                    form.cleaned_data["task_name"],
+                    form.cleaned_data["arguments"],
+                    started_by=request.user,
                 )
             except runner.ActiveRunExists as error:
                 form.add_error("task_name", str(error))

@@ -32,6 +32,18 @@ def test_run_processes_whole_queryset():
     assert run.started_at and run.ended_at
 
 
+def test_start_does_not_count_rows(settings):
+    # Nothing executes on the dummy backend, so this shows start() itself
+    # leaves counting to the job.
+    settings.TASKS = {"default": {"BACKEND": "django.tasks.backends.dummy.DummyBackend"}}
+    make_posts(5)
+
+    run = runner.start(tasks.BackfillSlugs.name)
+
+    run.refresh_from_db()
+    assert (run.status, run.tick_total) == (Status.ENQUEUED, None)
+
+
 def test_resume_continues_after_cursor():
     make_posts(25)
     pks = list(Post.objects.order_by("pk").values_list("pk", flat=True))
@@ -259,7 +271,9 @@ def test_admin_start_and_changelist(admin_client):
     )
 
     assert response.status_code == 302
-    assert Run.objects.get().status == Status.SUCCEEDED
+    run = Run.objects.get()
+    assert run.status == Status.SUCCEEDED
+    assert run.started_by.username == "admin"
     changelist = admin_client.get("/admin/maintenance_tasks/run/")
     assert b"Start a run" in changelist.content
     assert b"3 / 3 (100%)" in changelist.content
