@@ -17,8 +17,10 @@ Celery and others.
 
 ## Install
 
+Requires Python 3.12+ and Django 6.0+. Not on PyPI yet, so install from GitHub:
+
 ```bash
-pip install django-maintenance-tasks
+pip install git+https://github.com/ajinkyapisal/django-maintenance-tasks
 ```
 
 ```python
@@ -79,7 +81,7 @@ From the command line:
 
 ```bash
 python manage.py maintenance_tasks list
-python manage.py maintenance_tasks run blog.maintenance_tasks.BackfillSlugs --arguments '{"dry_run": true}'
+python manage.py maintenance_tasks run blog.maintenance_tasks.BackfillSlugs --arguments '{"batch": "2024-q1"}'
 ```
 
 From code:

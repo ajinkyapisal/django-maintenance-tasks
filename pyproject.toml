@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-maintenance-tasks"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "Pausable, resumable, throttled data backfills for Django, built on django.tasks."
 readme = "README.md"
 license = "MIT"
@@ -15,6 +15,10 @@ classifiers = [
     "Framework :: Django :: 6.0",
     "Programming Language :: Python :: 3",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ajinkyapisal/django-maintenance-tasks"
+Issues = "https://github.com/ajinkyapisal/django-maintenance-tasks/issues"
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-django"]
