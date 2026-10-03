@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-maintenance-tasks"
-version = "0.1.0"
+version = "0.2.0"
 description = "Pausable, resumable, throttled data backfills for Django, built on django.tasks."
 readme = "README.md"
 license = "MIT"
@@ -13,6 +13,7 @@ dependencies = ["Django>=6.0"]
 classifiers = [
     "Framework :: Django",
     "Framework :: Django :: 6.0",
+    "Framework :: Django :: 6.1",
     "Programming Language :: Python :: 3",
 ]
 
